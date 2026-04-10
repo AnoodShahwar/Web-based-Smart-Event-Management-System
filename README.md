@@ -1,6 +1,6 @@
 # WSEMS — Web-based Smart Event Management System
 
-**A full-stack web application** built with Flutter Web and Firebase that centralizes university campus event management — replacing scattered notice boards and social media posts with a structured, role-based platform.
+**A Flutter Web application with a Firebase backend** built to centralize university campus event management — replacing scattered notice boards and social media posts with a structured, role-based platform.
 
 **Live Demo:** `[coming soon after deployment]`
 
