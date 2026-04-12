@@ -127,24 +127,45 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
-                title: Text(
-                  event.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        event.title,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    if (event.isComingSoon)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: kPrimaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(99),
+                        ),
+                        child: const Text(
+                          'Coming Soon',
+                          style: TextStyle(fontSize: 11, color: kPrimaryColor),
+                        ),
+                      ),
+                  ],
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 4),
                     Text(
-                      '${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year} • ${event.location}',
+                      event.isComingSoon
+                          ? 'Coming Soon • ${event.location}'
+                          : '${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year} • ${event.location}',
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${event.registeredCount}/${event.capacity} registered',
-                      style: TextStyle(
-                        color: event.isFull
-                            ? Colors.red.shade600
-                            : Colors.green.shade600,
+                      '${event.department} • ${event.registrationType}${event.ticketPrice > 0 ? ' • Rs. ${event.ticketPrice.toStringAsFixed(0)}' : ''}',
+                      style: const TextStyle(
+                        color: kPrimaryColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -248,55 +269,54 @@ class _AdminScreenState extends State<AdminScreen> {
       builder: (context, snapshot) {
         final events = snapshot.data ?? [];
         final totalEvents = events.length;
-        final totalRegistrations = events.fold(
+        final totalAttending = events.fold(
           0,
-          (sum, e) => sum + e.registeredCount,
+          (sum, e) => sum + e.attendingCount,
         );
-        final fullEvents = events.where((e) => e.isFull).length;
         final upcomingEvents = events.where((e) => e.isUpcoming).length;
+        final paidEvents = events
+            .where((e) => e.registrationType == 'Paid (Onsite)')
+            .length;
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
                 'Overview',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
-              // Stats grid
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.5,
+              const SizedBox(height: 12),
+              // Smaller stat cards in a row
+              Row(
                 children: [
                   _statCard(
-                    'Total Events',
+                    'Events',
                     totalEvents.toString(),
                     Icons.event,
                     kPrimaryColor,
                   ),
+                  const SizedBox(width: 8),
                   _statCard(
-                    'Registrations',
-                    totalRegistrations.toString(),
+                    'Attending',
+                    totalAttending.toString(),
                     Icons.people,
                     Colors.green.shade600,
                   ),
+                  const SizedBox(width: 8),
                   _statCard(
                     'Upcoming',
                     upcomingEvents.toString(),
                     Icons.upcoming,
                     Colors.blue.shade600,
                   ),
+                  const SizedBox(width: 8),
                   _statCard(
-                    'Full Events',
-                    fullEvents.toString(),
-                    Icons.event_busy,
-                    Colors.red.shade600,
+                    'Paid',
+                    paidEvents.toString(),
+                    Icons.attach_money,
+                    Colors.orange.shade600,
                   ),
                 ],
               ),
@@ -320,10 +340,12 @@ class _AdminScreenState extends State<AdminScreen> {
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         subtitle: Text(
-                          '${event.registeredCount}/${event.capacity} registered',
+                          '${event.attendingCount} attending • ${event.department}',
                         ),
                         trailing: Text(
-                          '${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year}',
+                          event.isComingSoon
+                              ? 'Coming Soon'
+                              : '${event.dateTime.day}/${event.dateTime.month}/${event.dateTime.year}',
                           style: TextStyle(color: Colors.grey.shade600),
                         ),
                       ),
@@ -336,33 +358,35 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
-  // STAT CARD
+  // STAT CARD — smaller now
   Widget _statCard(String label, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
-          ),
-          Text(
-            label,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-          ),
-        ],
+            Text(
+              label,
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -408,21 +432,18 @@ class _AdminScreenState extends State<AdminScreen> {
     final locationController = TextEditingController(
       text: event?.location ?? '',
     );
-    final capacityController = TextEditingController(
-      text: event?.capacity.toString() ?? '',
-    );
-    String selectedCategory = event?.category ?? 'General';
+    String selectedCategory = event?.category ?? kCategories[0];
+    String selectedDepartment = event?.department ?? kDepartments[1];
+    String selectedRegistrationType =
+        event?.registrationType ?? kRegistrationTypes[0];
     DateTime selectedDate = event?.dateTime ?? DateTime.now();
+    bool isComingSoon = event?.isComingSoon ?? false;
+    final ticketPriceController = TextEditingController(
+      text: event?.ticketPrice != null && event!.ticketPrice > 0
+          ? event.ticketPrice.toStringAsFixed(0)
+          : '',
+    );
     final formKey = GlobalKey<FormState>();
-
-    final categories = [
-      'General',
-      'Academic',
-      'Sports',
-      'Cultural',
-      'Workshop',
-      'Seminar',
-    ];
 
     showModalBottomSheet(
       context: context,
@@ -491,27 +512,40 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Capacity
-                  TextFormField(
-                    controller: capacityController,
-                    keyboardType: TextInputType.number,
+                  // Department
+                  DropdownButtonFormField<String>(
+                    value: selectedDepartment,
+                    isExpanded: true,
+                    menuMaxHeight: 300,
                     decoration: const InputDecoration(
-                      labelText: 'Capacity',
+                      labelText: 'Organizing Department',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (v) =>
-                        v!.isEmpty ? 'Please enter capacity' : null,
+                    items: kDepartments
+                        .where((d) => d != 'All')
+                        .map(
+                          (d) => DropdownMenuItem(
+                            value: d,
+                            child: Text(
+                              d,
+                              style: const TextStyle(fontSize: 13),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) =>
+                        setModalState(() => selectedDepartment = v!),
                   ),
                   const SizedBox(height: 12),
 
-                  // Category dropdown
+                  // Category
                   DropdownButtonFormField<String>(
                     value: selectedCategory,
                     decoration: const InputDecoration(
                       labelText: 'Category',
                       border: OutlineInputBorder(),
                     ),
-                    items: categories
+                    items: kCategories
                         .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                         .toList(),
                     onChanged: (v) =>
@@ -519,43 +553,133 @@ class _AdminScreenState extends State<AdminScreen> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Date picker
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const Icon(
-                      Icons.calendar_today,
-                      color: kPrimaryColor,
+                  // Registration Type
+                  DropdownButtonFormField<String>(
+                    value: selectedRegistrationType,
+                    decoration: const InputDecoration(
+                      labelText: 'Registration Type',
+                      border: OutlineInputBorder(),
                     ),
-                    title: Text(
-                      '${selectedDate.day}/${selectedDate.month}/${selectedDate.year} at ${selectedDate.hour}:${selectedDate.minute.toString().padLeft(2, '0')}',
-                    ),
-                    subtitle: const Text('Tap to change date & time'),
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime.now(),
-                        lastDate: DateTime.now().add(const Duration(days: 365)),
-                      );
-                      if (date != null && context.mounted) {
-                        final time = await showTimePicker(
-                          context: context,
-                          initialTime: TimeOfDay.fromDateTime(selectedDate),
-                        );
-                        if (time != null) {
-                          setModalState(() {
-                            selectedDate = DateTime(
-                              date.year,
-                              date.month,
-                              date.day,
-                              time.hour,
-                              time.minute,
-                            );
-                          });
-                        }
-                      }
-                    },
+                    items: kRegistrationTypes
+                        .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                        .toList(),
+                    onChanged: (v) =>
+                        setModalState(() => selectedRegistrationType = v!),
                   ),
+                  const SizedBox(height: 12),
+
+                  // Ticket Price (only if Paid)
+                  if (selectedRegistrationType == 'Paid (Onsite)') ...[
+                    TextFormField(
+                      controller: ticketPriceController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Ticket Price (Rs.)',
+                        prefixIcon: Icon(Icons.attach_money),
+                        border: OutlineInputBorder(),
+                        hintText: 'e.g. 500',
+                      ),
+                      validator: (v) {
+                        if (selectedRegistrationType == 'Paid (Onsite)' &&
+                            (v == null || v.isEmpty)) {
+                          return 'Please enter ticket price';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  // Coming Soon Toggle
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          color: kPrimaryColor,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Coming Soon',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                'Hide date and mark as coming soon',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: isComingSoon,
+                          activeColor: kPrimaryColor,
+                          onChanged: (v) =>
+                              setModalState(() => isComingSoon = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Date picker (hidden if coming soon)
+                  if (!isComingSoon)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.calendar_today,
+                        color: kPrimaryColor,
+                      ),
+                      title: Text(
+                        '${selectedDate.day}/${selectedDate.month}/${selectedDate.year} at ${selectedDate.hour}:${selectedDate.minute.toString().padLeft(2, '0')}',
+                      ),
+                      subtitle: const Text('Tap to change date & time'),
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
+                        );
+                        if (date != null && context.mounted) {
+                          final time = await showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.fromDateTime(selectedDate),
+                          );
+                          if (time != null) {
+                            setModalState(() {
+                              selectedDate = DateTime(
+                                date.year,
+                                date.month,
+                                date.day,
+                                time.hour,
+                                time.minute,
+                              );
+                            });
+                          }
+                        }
+                      },
+                    ),
                   const SizedBox(height: 20),
 
                   // Submit button
@@ -571,10 +695,15 @@ class _AdminScreenState extends State<AdminScreen> {
                           description: descController.text.trim(),
                           location: locationController.text.trim(),
                           dateTime: selectedDate,
-                          capacity: int.parse(capacityController.text.trim()),
-                          registeredCount: event?.registeredCount ?? 0,
-                          createdBy: _authService.currentUser?.uid ?? '',
+                          department: selectedDepartment,
                           category: selectedCategory,
+                          registrationType: selectedRegistrationType,
+                          attendingCount: event?.attendingCount ?? 0,
+                          createdBy: _authService.currentUser?.uid ?? '',
+                          isComingSoon: isComingSoon,
+                          ticketPrice: ticketPriceController.text.isEmpty
+                              ? 0
+                              : double.parse(ticketPriceController.text),
                         );
                         if (event == null) {
                           await _eventService.createEvent(newEvent);

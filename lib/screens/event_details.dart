@@ -14,30 +14,28 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
   final EventService _eventService = EventService();
-  bool isRegistered = false;
+  bool isAttending = false;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _checkRegistration();
+    _checkAttending();
   }
 
-  // Check if student is already registered
-  Future<void> _checkRegistration() async {
-    final result = await _eventService.isRegistered(widget.eventId);
-    setState(() => isRegistered = result);
+  Future<void> _checkAttending() async {
+    final result = await _eventService.isAttending(widget.eventId);
+    setState(() => isAttending = result);
   }
 
-  // Register or cancel registration
-  Future<void> _toggleRegistration(EventModel event) async {
+  Future<void> _toggleAttending(EventModel event) async {
     setState(() => isLoading = true);
 
     String? error;
-    if (isRegistered) {
-      error = await _eventService.cancelRegistration(widget.eventId);
+    if (isAttending) {
+      error = await _eventService.unmarkAttending(widget.eventId);
     } else {
-      error = await _eventService.registerForEvent(widget.eventId);
+      error = await _eventService.markAttending(widget.eventId);
     }
 
     setState(() => isLoading = false);
@@ -49,16 +47,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         );
       }
     } else {
-      setState(() => isRegistered = !isRegistered);
+      setState(() => isAttending = !isAttending);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              isRegistered
-                  ? 'Successfully registered!'
-                  : 'Registration cancelled.',
+              isAttending
+                  ? "You're attending this event!"
+                  : 'Removed from your events.',
             ),
-            backgroundColor: isRegistered
+            backgroundColor: isAttending
                 ? Colors.green.shade600
                 : Colors.orange.shade600,
           ),
@@ -102,23 +100,44 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Category badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                        child: Text(
-                          event.category,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Text(
+                              event.category,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                            child: Text(
+                              event.registrationType,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -129,34 +148,24 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      // Full badge
-                      if (event.isFull)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade400,
-                            borderRadius: BorderRadius.circular(99),
-                          ),
-                          child: const Text(
-                            'Event Full',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
-                          ),
+                      const SizedBox(height: 4),
+                      Text(
+                        event.department,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.8),
+                          fontSize: 14,
                         ),
+                      ),
                     ],
                   ),
                 ),
 
-                // Event info
                 Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Info cards row
+                      // Info cards
                       Row(
                         children: [
                           _infoCard(
@@ -173,8 +182,8 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           const SizedBox(width: 12),
                           _infoCard(
                             Icons.people,
-                            'Capacity',
-                            '${event.registeredCount}/${event.capacity}',
+                            'Attending',
+                            '${event.attendingCount}',
                           ),
                         ],
                       ),
@@ -198,7 +207,39 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 12),
+
+                      // Registration type notice
+                      if (event.registrationType == 'Paid (Onsite)')
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.orange.shade700,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'This is a paid event. Tickets are available for purchase onsite on the day of the event.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.orange.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      const SizedBox(height: 20),
 
                       // Description
                       const Text(
@@ -219,16 +260,16 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Register button
+                      // Attend button
                       SizedBox(
                         width: double.infinity,
                         height: 52,
                         child: ElevatedButton(
-                          onPressed: isLoading || event.isFull && !isRegistered
+                          onPressed: isLoading
                               ? null
-                              : () => _toggleRegistration(event),
+                              : () => _toggleAttending(event),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isRegistered
+                            backgroundColor: isAttending
                                 ? Colors.red.shade600
                                 : kPrimaryColor,
                             foregroundColor: Colors.white,
@@ -241,11 +282,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
                                   color: Colors.white,
                                 )
                               : Text(
-                                  isRegistered
-                                      ? 'Cancel Registration'
-                                      : event.isFull
-                                      ? 'Event Full'
-                                      : 'Register for Event',
+                                  isAttending
+                                      ? "Remove from My Events"
+                                      : "I'm Attending",
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
@@ -264,7 +303,6 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     );
   }
 
-  // Info card widget
   Widget _infoCard(IconData icon, String label, String value) {
     return Expanded(
       child: Container(

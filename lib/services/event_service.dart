@@ -6,13 +6,20 @@ class EventService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // GET ALL EVENTS - returns a live stream of events
-  Stream<List<EventModel>> getEvents() {
-    return _firestore.collection('events').orderBy('dateTime').snapshots().map((
-      snapshot,
-    ) {
+  // GET ALL EVENTS
+  Stream<List<EventModel>> getEvents({String? department}) {
+    Query query = _firestore.collection('events').orderBy('dateTime');
+    if (department != null && department != 'All') {
+      query = query.where('department', isEqualTo: department);
+    }
+    return query.snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => EventModel.fromFirestore(doc.data(), doc.id))
+          .map(
+            (doc) => EventModel.fromFirestore(
+              doc.data() as Map<String, dynamic>,
+              doc.id,
+            ),
+          )
           .toList();
     });
   }
@@ -32,17 +39,17 @@ class EventService {
     return null;
   }
 
-  // CREATE EVENT (admin only)
+  // CREATE EVENT
   Future<String?> createEvent(EventModel event) async {
     try {
       await _firestore.collection('events').add(event.toMap());
-      return null; // success
+      return null;
     } catch (e) {
       return e.toString();
     }
   }
 
-  // UPDATE EVENT (admin only)
+  // UPDATE EVENT
   Future<String?> updateEvent(String eventId, EventModel event) async {
     try {
       await _firestore.collection('events').doc(eventId).update(event.toMap());
@@ -52,7 +59,7 @@ class EventService {
     }
   }
 
-  // DELETE EVENT (admin only)
+  // DELETE EVENT
   Future<String?> deleteEvent(String eventId) async {
     try {
       await _firestore.collection('events').doc(eventId).delete();
@@ -62,57 +69,28 @@ class EventService {
     }
   }
 
-  // REGISTER FOR EVENT (student)
-  Future<String?> registerForEvent(String eventId) async {
+  // MARK ATTENDING
+  Future<String?> markAttending(String eventId) async {
     try {
       String uid = _auth.currentUser!.uid;
 
-      // Check if already registered
       DocumentSnapshot existing = await _firestore
-          .collection('registrations')
+          .collection('attendees')
           .doc('${uid}_$eventId')
           .get();
 
       if (existing.exists) {
-        return 'You are already registered for this event.';
+        return 'You have already marked attendance for this event.';
       }
 
-      // Get event to check capacity
-      EventModel? event = await getEvent(eventId);
-      if (event == null) return 'Event not found.';
-      if (event.isFull) return 'This event is full.';
-
-      // Add registration
-      await _firestore.collection('registrations').doc('${uid}_$eventId').set({
+      await _firestore.collection('attendees').doc('${uid}_$eventId').set({
         'userId': uid,
         'eventId': eventId,
-        'registeredAt': DateTime.now(),
+        'markedAt': DateTime.now(),
       });
 
-      // Increment registered count
       await _firestore.collection('events').doc(eventId).update({
-        'registeredCount': FieldValue.increment(1),
-      });
-
-      return null; // success
-    } catch (e) {
-      return e.toString();
-    }
-  }
-
-  // CANCEL REGISTRATION (student)
-  Future<String?> cancelRegistration(String eventId) async {
-    try {
-      String uid = _auth.currentUser!.uid;
-
-      await _firestore
-          .collection('registrations')
-          .doc('${uid}_$eventId')
-          .delete();
-
-      // Decrement registered count
-      await _firestore.collection('events').doc(eventId).update({
-        'registeredCount': FieldValue.increment(-1),
+        'attendingCount': FieldValue.increment(1),
       });
 
       return null;
@@ -121,21 +99,38 @@ class EventService {
     }
   }
 
-  // CHECK IF STUDENT IS REGISTERED FOR AN EVENT
-  Future<bool> isRegistered(String eventId) async {
+  // UNMARK ATTENDING
+  Future<String?> unmarkAttending(String eventId) async {
+    try {
+      String uid = _auth.currentUser!.uid;
+
+      await _firestore.collection('attendees').doc('${uid}_$eventId').delete();
+
+      await _firestore.collection('events').doc(eventId).update({
+        'attendingCount': FieldValue.increment(-1),
+      });
+
+      return null;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  // CHECK IF ATTENDING
+  Future<bool> isAttending(String eventId) async {
     String uid = _auth.currentUser!.uid;
     DocumentSnapshot doc = await _firestore
-        .collection('registrations')
+        .collection('attendees')
         .doc('${uid}_$eventId')
         .get();
     return doc.exists;
   }
 
-  // GET STUDENT'S REGISTERED EVENTS
-  Stream<List<String>> getMyRegisteredEventIds() {
+  // GET MY ATTENDING EVENT IDs
+  Stream<List<String>> getMyAttendingEventIds() {
     String uid = _auth.currentUser!.uid;
     return _firestore
-        .collection('registrations')
+        .collection('attendees')
         .where('userId', isEqualTo: uid)
         .snapshots()
         .map(
