@@ -1,48 +1,67 @@
-# WSEMS — Web-based Smart Event Management System
+<div align="center">
 
-**A Flutter Web application with a Firebase backend** built to centralize university campus event management — replacing scattered notice boards and social media posts with a structured, role-based platform.
+# 🎓 WSEMS
+### Web-based Smart Event Management System
 
-**Live Demo:** `[coming soon after deployment]`
+*"No more missing events because they were buried in a WhatsApp group."*
 
----
+🔗 **[Live Demo → wsems-9ef5f.web.app](https://wsems-9ef5f.web.app)**
 
-## What It Does
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 
-Universities struggle with event communication — students miss events, organizers lose track of registrations, and admins have no visibility. WSEMS solves this with a single platform where:
+![Status](https://img.shields.io/badge/status-DEPLOYED-brightgreen?style=for-the-badge)
+![Platform](https://img.shields.io/badge/platform-Web-blue?style=for-the-badge)
+![Backend](https://img.shields.io/badge/backend-Firebase-orange?style=for-the-badge)
 
-- **Students** discover events, register online, and track their participation
-- **Organizers** create and manage events, view attendees, and send updates
-- **Admins** oversee everything with a real-time dashboard and analytics
-
----
-
-## Built With
-
-![Flutter](https://img.shields.io/badge/Flutter-02569B?style=flat&logo=flutter&logoColor=white)
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
-![Dart](https://img.shields.io/badge/Dart-0175C2?style=flat&logo=dart&logoColor=white)
-
-- **Flutter Web** — single codebase, runs in any browser
-- **Firebase Auth** — secure email/password authentication
-- **Cloud Firestore** — real-time NoSQL database
-- **go_router** — declarative routing with role-based navigation
-- **Provider** — lightweight state management
-- **Firebase Hosting** — deployed as a live public URL
+</div>
 
 ---
 
-## Key Features
+## 🤔 The Problem
 
-- Role-based access control — students, organizers, and admins each see their own dashboard
-- Real-time event feed with search and filtering
-- Online event registration with instant confirmation
-- Admin analytics dashboard with participation reports
-- Secure authentication with protected routes
-- Fully responsive — works on any screen size
+University event management is a mess. Events get posted across WhatsApp groups, Instagram stories, and physical notice boards and students still miss them. Organizers lose track of who registered. Admins have zero visibility into what's happening on campus.
+
+**WSEMS fixes all of that.** One platform. Two roles. Zero chaos.
 
 ---
 
-## Project Structure
+## 👥 Who's It For?
+
+| Role | What They Can Do |
+|------|-----------------|
+| 🎓 **Student** | Browse events, register online, track attended events, filter by category |
+| 🗂️ **Admin** | Create & manage events, view all users, monitor registrations, see live dashboard analytics |
+
+---
+
+## ✨ Features
+
+- 🔐 **Role-based access control** : students and admins each get their own experience
+- 📅 **Real-time event feed** : with search, filtering, and "New" badges
+- ✅ **Online registration** : register for events with one tap
+- 🔖 **My Events** : students can track everything they've signed up for
+- 📊 **Admin dashboard** : live stats: total events, attending, upcoming, paid
+- 👤 **User management** : admins can view all registered users and their roles
+- 🔒 **Secure auth** : Firebase email/password with protected routes
+- 📱 **Fully responsive** : works on any screen size
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Tech |
+|-------|------|
+| 💻 Framework | Flutter Web (Dart) |
+| 🔥 Backend | Firebase (Firestore + Auth) |
+| 🧭 Routing | go_router (role-based navigation) |
+| 🧠 State | Provider |
+| 🚀 Hosting | Firebase Hosting |
+
+---
+
+## 📁 Project Structure
 
 ```
 lib/
@@ -55,18 +74,23 @@ lib/
 
 ---
 
-## Running Locally
+## 🧠 Development Approach
 
-```bash
-git clone https://github.com/AnoodShahwar/Web-based-Smart-Event-Management-System.git
-cd Web-based-Smart-Event-Management-System
-flutter pub get
-flutterfire configure
-flutter run -d chrome
-```
+Built solo using **Agile/Scrum** methodology across 4 sprints: incremental delivery, continuous testing, and conscious engineering tradeoffs to prioritize working features over incomplete ones.
 
 ---
 
-## Development Approach
+## 👤 Author
 
-Built solo using **Agile/Scrum** methodology across 4 sprints, with incremental delivery and continuous testing. Deliberately scoped to prioritize working features over incomplete ones — a conscious engineering tradeoff.
+**Anood Shahwar** : BSSE Student @ University of Karachi
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/anood-shahwar)
+[![Gmail](https://img.shields.io/badge/Gmail-anoodshahwar@gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:anoodshahwar@gmail.com)
+
+---
+
+<div align="center">
+
+
+
+</div>
