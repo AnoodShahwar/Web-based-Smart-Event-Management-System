@@ -5,12 +5,8 @@ import 'utils/app_router.dart';
 import 'utils/constants.dart';
 
 void main() async {
-  // Makes sure Flutter is ready before we initialize Firebase
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Initialize Firebase with our project's settings
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
   runApp(const MyApp());
 }
 
@@ -27,6 +23,7 @@ class MyApp extends StatelessWidget {
           seedColor: kPrimaryColor,
           primary: kPrimaryColor,
         ),
+        fontFamily: 'Poppins',
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
           backgroundColor: kPrimaryColor,
@@ -38,7 +35,7 @@ class MyApp extends StatelessWidget {
             backgroundColor: kPrimaryColor,
             foregroundColor: kWhite,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),

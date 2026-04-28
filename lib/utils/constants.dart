@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
 
-// App primary color
-const Color kPrimaryColor = Color.fromARGB(255, 48, 7, 58);
-const Color kPrimaryLight = Color.fromARGB(255, 78, 17, 93);
-const Color kPrimaryDark = Color.fromARGB(255, 28, 2, 35);
-const Color kAccentColor = Color.fromARGB(255, 180, 50, 210);
-const Color kBackgroundColor = Color.fromARGB(255, 245, 240, 247);
+// Frosted Sorbet Palette
+const Color kPrimaryColor = Color(0xFF0D9488); // Tropical Teal
+const Color kSecondaryColor = Color(0xFFFB923C); // Soft Apricot
+const Color kPrimaryDark = Color(0xFF0F766E); // Darker Teal
+const Color kPrimaryLight = Color(0xFF5EEAD4); // Light Teal
+const Color kAccentColor = Color(0xFFFB923C); // Apricot accent
+const Color kBackgroundColor = Color(0xFFFFFBEB); // Warm White
+const Color kSurfaceColor = Color(0xFFF0FDFA); // Teal tinted surface
+const Color kTextDark = Color(0xFF451A03); // Espresso
 const Color kWhite = Colors.white;
+
+// Category colors
+const Map<String, Color> kCategoryColors = {
+  'Student Activities & Co-curricular': Color(0xFF0D9488),
+  'National & Public Events': Color(0xFF0F766E),
+  'Academic & Professional': Color(0xFF1565C0),
+  'Cultural & Religious': Color(0xFFAD1457),
+  'Awareness & Social Issues': Color(0xFF2E7D32),
+  'Institutional & Competitive': Color(0xFFFB923C),
+  'Conference': Color(0xFF00838F),
+  'Exhibition': Color(0xFF558B2F),
+  'General': Color(0xFF0D9488),
+  'Seminar': Color(0xFF1565C0),
+  'Sports': Color(0xFFFB923C),
+  'Workshop': Color(0xFF6A1B9A),
+};
+
 // UoK Departments
 const List<String> kDepartments = [
   'All',
